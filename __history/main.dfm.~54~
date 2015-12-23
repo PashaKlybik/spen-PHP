@@ -1,0 +1,103 @@
+object frmMain: TfrmMain
+  Left = 0
+  Top = 0
+  BorderStyle = bsSingle
+  Caption = 
+    #1052#1077#1090#1088#1080#1082#1072' '#1063#1077#1087#1080#1085#1072'                       '#1042#1099#1087#1086#1083#1085#1080#1083': '#1056#1072#1076#1082#1077#1074#1080#1095' '#1040'.'#1044'. 451' +
+    '005'
+  ClientHeight = 487
+  ClientWidth = 895
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesktopCenter
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object lblCountOfStrings: TLabel
+    Left = 608
+    Top = 8
+    Width = 56
+    Height = 16
+    Caption = #1057#1090#1088#1086#1082': '
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblCountOfAllSymbols: TLabel
+    Left = 608
+    Top = 24
+    Width = 80
+    Height = 16
+    Caption = #1057#1080#1084#1074#1086#1083#1086#1074': '
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object lblCountSymbols: TLabel
+    Left = 608
+    Top = 38
+    Width = 184
+    Height = 16
+    Caption = #1053#1077#1087#1088#1086#1073#1077#1083#1100#1085#1099#1093' '#1089#1080#1084#1074#1086#1083#1086#1074': '
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object mmoCode: TMemo
+    Left = 8
+    Top = 8
+    Width = 578
+    Height = 465
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Style = []
+    Lines.Strings = (
+      '$a $b $RT_Dtg4')
+    ParentFont = False
+    ScrollBars = ssBoth
+    TabOrder = 0
+    WordWrap = False
+    OnChange = mmoCodeChange
+  end
+  object btnStart: TButton
+    Left = 608
+    Top = 440
+    Width = 273
+    Height = 33
+    Caption = #1042#1099#1095#1080#1089#1083#1080#1090#1100
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -19
+    Font.Name = 'Courier New'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 1
+    OnClick = btnStartClick
+  end
+  object strngrdResult: TStringGrid
+    Left = 607
+    Top = 60
+    Width = 280
+    Height = 309
+    ColCount = 2
+    DefaultColWidth = 128
+    FixedCols = 0
+    TabOrder = 2
+  end
+end

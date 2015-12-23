@@ -1,0 +1,234 @@
+unit main;
+
+interface
+
+uses
+   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+   System.Classes, Vcl.Graphics,
+   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, RegExpr, Vcl.StdCtrls, Vcl.Grids;
+
+type
+   TArrayOfStrings = array of string;
+   TArrayOfInteger = array of Integer;
+
+   TfrmMain = class(TForm)
+      mmoCode: TMemo;
+      btnStart: TButton;
+      lblCountOfStrings: TLabel;
+      lblCountOfAllSymbols: TLabel;
+      lblCountSymbols: TLabel;
+      strngrdResult: TStringGrid;
+      lblSpenResult: TLabel;
+      procedure btnStartClick(Sender: TObject);
+      procedure mmoCodeChange(Sender: TObject);
+      procedure CleanUp;
+      function Search_Variables(ArrayOfTemplate: array of string;
+        isGlobal: Boolean): TArrayOfStrings;
+      function Search_CountOfVariables(ArrayOfVariables: array of string;
+        isGlobal: Boolean): TArrayOfInteger;
+      procedure PtintResults(ArrayOfGlobalVariables, ArrayOfVariables
+        : TArrayOfStrings; ArrayOfCountOfGlobalVariables,
+        ArrayOfCountOfVariables: TArrayOfInteger);
+      procedure FormCreate(Sender: TObject);
+   private
+      { Private declarations }
+   public
+      { Public declarations }
+   end;
+
+const
+   ArrayOfTemplate_CleanUP: array [0 .. 3] of string = ('\/\/.*\Z', '\/\*.*',
+     '.*\*\/', '\s*');
+   ArrayOfTemplateGlobalVar: array [0 .. 2] of string = ('\s?global\s*\$(\w+)',
+     '\s?\$GLOBALS\[\''(\w+)', '\s?\$(\w+)');
+   ArrayOfTemplateVar: array [0 .. 0] of string = ('\s?\$(\w+)');
+   FunctionHeader: string = '(procedure|function).*';
+
+var
+   frmMain: TfrmMain;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmMain.CleanUp;
+var
+   RegExp: TRegExpr;
+   SearchString: string;
+   i, j: Integer;
+begin
+   for i := 0 to mmoCode.Lines.Count - 1 do
+      for j := 0 to Length(ArrayOfTemplate_CleanUP) - 1 do
+      begin
+         SearchString := mmoCode.Lines[i];
+         RegExp := TRegExpr.Create;
+         try
+            RegExp.Expression := ArrayOfTemplate_CleanUP[j];
+            if RegExp.Exec(SearchString) then
+            begin
+               mmoCode.Lines[i] := StringReplace(mmoCode.Lines[i],
+                 RegExp.Match[0], '', [rfReplaceAll, rfIgnoreCase]);
+            end;
+         finally
+            RegExp.Free;
+         end;
+      end;
+   mmoCode.Text := trim(StringReplace(mmoCode.Text, #13#10#13#10, #13#10,
+     [rfReplaceAll]));
+end;
+
+procedure TfrmMain.FormCreate(Sender: TObject);
+begin
+   strngrdResult.Cells[0, 0] := 'Переменная';
+   strngrdResult.Cells[1, 0] := 'Спен';
+end;
+
+function NotInArray(ArrayOfVariables: array of string;
+  inputString: string): Boolean;
+var
+   NotFound: Boolean;
+   i: Integer;
+begin
+   i := 0;
+   NotFound := true;
+   while (NotFound = true and (i <> Length(ArrayOfVariables))) do
+   begin
+      if ArrayOfVariables[i] = inputString then
+         NotFound := False;
+      Inc(i);
+   end;
+   Result := NotFound;
+end;
+
+function TfrmMain.Search_Variables(ArrayOfTemplate: array of string;
+  isGlobal: Boolean): TArrayOfStrings;
+var
+   ArrayOfVariables: TArrayOfStrings;
+   RegExp: TRegExpr;
+   SearchString: string;
+   i, j, k: Integer;
+begin
+   k := 1;
+   for j := 0 to Length(ArrayOfTemplate) - 1 do
+      for i := 0 to mmoCode.Lines.Count - 1 do
+      begin
+         SearchString := mmoCode.Lines[i];
+         RegExp := TRegExpr.Create;
+
+         if isGlobal = true then
+         begin
+            RegExp.Expression := FunctionHeader;
+            if RegExp.Exec(SearchString) then
+               Break;
+         end;
+         try
+            RegExp.Expression := ArrayOfTemplate[j];
+            if RegExp.Exec(SearchString) then
+               repeat
+                  if NotInArray(ArrayOfVariables, RegExp.Match[1]) then
+                  begin
+                     SetLength(ArrayOfVariables, k);
+                     ArrayOfVariables[k - 1] := RegExp.Match[1];
+                     Inc(k);
+                  end;
+               until (not RegExp.ExecNext);
+         finally
+            RegExp.Free;
+         end;
+      end;
+   Result := ArrayOfVariables;
+end;
+
+function TfrmMain.Search_CountOfVariables(ArrayOfVariables: array of string;
+  isGlobal: Boolean): TArrayOfInteger;
+var
+   ArrayOfCountOfVariables: TArrayOfInteger;
+   CountOfVariables, LengthOfArray: Integer;
+   i: Integer;
+   SearchString: string;
+   RegExp: TRegExpr;
+begin
+   SearchString := mmoCode.Text;
+   LengthOfArray := 0;
+   for i := 0 to Length(ArrayOfVariables) - 1 do
+   begin
+      RegExp := TRegExpr.Create;
+      CountOfVariables := 0;
+      try
+         RegExp.Expression := '\$' + ArrayOfVariables[i];
+         if RegExp.Exec(SearchString) then
+            repeat
+               Inc(CountOfVariables);
+            until (not RegExp.ExecNext);
+         SetLength(ArrayOfCountOfVariables, LengthOfArray + 1);
+         ArrayOfCountOfVariables[LengthOfArray] := CountOfVariables;
+         Inc(LengthOfArray);
+      finally
+         RegExp.Free;
+      end;
+   end;
+   Result := ArrayOfCountOfVariables;
+end;
+
+procedure TfrmMain.PtintResults(ArrayOfGlobalVariables, ArrayOfVariables
+  : TArrayOfStrings; ArrayOfCountOfGlobalVariables, ArrayOfCountOfVariables
+  : TArrayOfInteger);
+var
+   i, j: Integer;
+   resultSpen: Integer;
+begin
+   resultSpen := 0;
+   for i := 0 to Length(ArrayOfGlobalVariables) - 1 do
+   begin
+      strngrdResult.Cells[0, i + 1] := ArrayOfGlobalVariables[i] + '(global)';
+      strngrdResult.Cells[1, i + 1] :=
+        IntToStr(ArrayOfCountOfGlobalVariables[i] - 1);
+   end;
+   i := 0;
+   for j := Length(ArrayOfGlobalVariables) to Length(ArrayOfGlobalVariables) +
+     Length(ArrayOfVariables) - 1 do
+   begin
+      strngrdResult.Cells[0, j + 1] := ArrayOfVariables[i];
+      strngrdResult.Cells[1, j + 1] := IntToStr(ArrayOfCountOfVariables[i] - 1);
+      Inc(i);
+   end;
+   for i := 1 to strngrdResult.RowCount - 1 do
+      resultSpen := resultSpen + StrToInt(strngrdResult.Cells[1, i]);
+   lblSpenResult.Caption := 'Общий спен = ' + IntToStr(resultSpen);
+end;
+
+procedure TfrmMain.btnStartClick(Sender: TObject);
+var
+   ArrayOfCountOfGlobalVariables, ArrayOfCountOfVariables: TArrayOfInteger;
+   ArrayOfVariables, ArrayOfGlobalVariables: TArrayOfStrings;
+begin
+   CleanUp;
+   ArrayOfVariables := Search_Variables(ArrayOfTemplateVar, False);
+   ArrayOfGlobalVariables := Search_Variables(ArrayOfTemplateGlobalVar, true);
+   ArrayOfCountOfGlobalVariables := Search_CountOfVariables
+     (ArrayOfGlobalVariables, true);
+   ArrayOfCountOfVariables := Search_CountOfVariables(ArrayOfVariables, False);
+   strngrdResult.RowCount := Length(ArrayOfVariables) +
+     Length(ArrayOfGlobalVariables) + 1;
+   PtintResults(ArrayOfGlobalVariables, ArrayOfVariables,
+     ArrayOfCountOfGlobalVariables, ArrayOfCountOfVariables);
+end;
+
+procedure TfrmMain.mmoCodeChange(Sender: TObject);
+var
+   CountOfSymbols: Integer;
+   RegExp: TRegExpr;
+begin
+   RegExp := TRegExpr.Create;
+   lblCountOfStrings.Caption := 'Строк: ' + IntToStr(mmoCode.Lines.Count);
+   lblCountOfAllSymbols.Caption := 'Символов: ' +
+     IntToStr(Length(mmoCode.Text));
+   CountOfSymbols := 0;
+   RegExp.Expression := '\s';
+   CountOfSymbols := CountOfSymbols +
+     Length(RegExp.Replace(mmoCode.Text, '', False));
+   lblCountSymbols.Caption := 'Непробельных символов: ' +
+     IntToStr(CountOfSymbols);
+end;
+
+end.

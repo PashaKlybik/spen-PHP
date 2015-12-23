@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.420,C:\Users\Alexey Radkevich\Desktop\метрология\spen-PHP\spen.dproj=C:\Users\Alexey Radkevich\Desktop\метрология\spen-PHP\chapin.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.196,C:\Users\Alexey Radkevich\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\Alexey Radkevich\Desktop\метрология\Новая папка\main.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.311,C:\Users\Alexey Radkevich\Documents\Embarcadero\Studio\Projects\Project5.dproj=C:\Users\Alexey Radkevich\Desktop\метрология\Новая папка\chapin.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.196,C:\Users\Alexey Radkevich\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\Alexey Radkevich\Desktop\метрология\Новая папка\main.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.771,=C:\Users\Alexey Radkevich\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>
